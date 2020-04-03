@@ -1,0 +1,38 @@
+version: '2.2'
+services: 
+    elasticsearch:
+        image: reyhanfahlevi/elasticsearch:7.5.1-sg
+        container_name: elasticsearch
+        environment:
+          - discovery.type=single-node
+        ulimits:
+          memlock:
+            soft: -1
+            hard: -1
+        ports:
+          - 9200:9200
+        networks:
+          - elastic
+    kibana:
+        image: reyhanfahlevi/kibana:7.5.1-sg
+        container_name: kibana-sg
+        restart: always
+        depends_on: 
+            - elasticsearch
+        environment:
+          - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+          - ELASTICSEARCH_USERNAME=kibanaserver
+          - ELASTICSEARCH_PASSWORD=kibanaserver
+          - NODE_OPTIONS=--max-old-space-size=4096
+        ports:
+            - "5601:5601"
+        networks:
+            - elastic
+        mem_limit: 3333m
+networks:
+    elastic:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+            - subnet:  10.103.0.1/16
